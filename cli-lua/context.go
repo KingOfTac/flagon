@@ -18,14 +18,14 @@ func newLuaContext(ctx interface{}, L *lua.LState) *lua.LTable {
 	t.RawSetString("args", args)
 
 	app := cli.AppFromContext(ctx.(context.Context))
-	if app != nil && app.Logger != nil {
-		t.RawSetString("log", L.NewFunction(func(L *lua.LState) int {
-			level := L.CheckString(1)
-			msg := L.CheckString(2)
+	t.RawSetString("log", L.NewFunction(func(L *lua.LState) int {
+		level := L.CheckString(1)
+		msg := L.CheckString(2)
+		if app != nil && app.Logger != nil {
 			app.Logger.Printf("[%s] %s", level, msg)
-			return 0
-		}))
-	}
+		}
+		return 0
+	}))
 
 	t.RawSetString("next", L.NewFunction(func(L *lua.LState) int {
 		// do nothing

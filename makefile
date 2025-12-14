@@ -16,5 +16,5 @@ run: build
 
 # Test all packages
 test:
-	go test ./cli
-	go test ./cli-lua
+	cd cli && go test
+	cd cli-lua && go test
