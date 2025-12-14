@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -13,48 +12,6 @@ import (
 )
 
 type Handler func(ctx context.Context) error
-type Hook func(ctx context.Context) error
-type Middleware func(next Handler) Handler
-
-type HookPhase int
-
-const (
-	BeforeRun HookPhase = iota
-	AfterRun
-	BeforeCommand
-	AfterCommand
-)
-
-type Arg struct {
-	Name        string
-	Description string
-	Optional    bool
-	Variadic    bool
-}
-
-type Command struct {
-	Name        string
-	Description string
-	Summary     string
-	Hidden      bool
-
-	Aliases []string
-	Args    []Arg
-	Flags   func(fs *flag.FlagSet)
-
-	Handler  Handler
-	Commands []*Command
-
-	Before []Hook
-	After  []Hook
-
-	Middleware []Middleware
-}
-
-type App struct {
-	Logger *log.Logger
-	Data   map[string]any
-}
 
 type CLI struct {
 	app             *App
@@ -65,46 +22,6 @@ type CLI struct {
 	hooks           map[HookPhase][]Hook
 	Middleware      []Middleware
 	HelpCommandName string
-}
-
-type PluginRegistrar interface {
-	RegisterCommand(parentPath []string, cmd *Command) error
-	Use(m Middleware)
-	Hook(phase HookPhase, h Hook)
-	FindCommand(path ...string) (*Command, bool)
-}
-
-type Option func(*CLI)
-
-func WithWriters(out, err io.Writer) Option {
-	return func(c *CLI) {
-		if out != nil {
-			c.out = out
-		}
-		if err != nil {
-			c.err = err
-		}
-	}
-}
-
-func WithLogger(l *log.Logger) Option {
-	return func(c *CLI) {
-		c.app.Logger = l
-	}
-}
-
-func WithAppData(m map[string]any) Option {
-	return func(c *CLI) {
-		c.app.Data = m
-	}
-}
-
-func WithHelpCommandName(name string) Option {
-	return func(c *CLI) {
-		if strings.TrimSpace(name) != "" {
-			c.HelpCommandName = name
-		}
-	}
 }
 
 func New(root *Command, opts ...Option) *CLI {
@@ -148,64 +65,6 @@ func (c *CLI) App() *App {
 
 func (c *CLI) Context() context.Context {
 	return c.ctx
-}
-
-func (c *CLI) Use(m Middleware) {
-	if m != nil {
-		c.Middleware = append(c.Middleware, m)
-	}
-}
-
-func (c *CLI) Hook(phase HookPhase, h Hook) {
-	if h == nil {
-		return
-	}
-
-	c.hooks[phase] = append(c.hooks[phase], h)
-}
-
-func (c *CLI) FindCommand(path ...string) (*Command, bool) {
-	if len(path) == 0 {
-		return c.Root, true
-	}
-
-	cur := c.Root
-
-	for _, p := range path {
-		next := findSubcommand(cur, p)
-		if next == nil {
-			return nil, false
-		}
-		cur = next
-	}
-	return cur, true
-}
-
-func (c *CLI) RegisterCommand(parentPath []string, cmd *Command) error {
-	if cmd == nil {
-		return errors.New("command cannot be nil")
-	}
-
-	if strings.TrimSpace(cmd.Name) == "" {
-		return errors.New("command name cannot be empty")
-	}
-
-	parent, ok := c.FindCommand(parentPath...)
-	if !ok {
-		return fmt.Errorf("parent command not found: %v", parentPath)
-	}
-
-	if collides(parent, cmd.Name) {
-		return fmt.Errorf("command name collision: %s", cmd.Name)
-	}
-	for _, a := range cmd.Aliases {
-		if collides(parent, a) {
-			return fmt.Errorf("command alias collision: %s", a)
-		}
-	}
-
-	parent.Commands = append(parent.Commands, cmd)
-	return nil
 }
 
 func (c *CLI) Run(args []string) error {
@@ -357,6 +216,7 @@ func (c *CLI) printHelp(cmd *Command) error {
 	}
 
 	w := c.out
+	minSpacing := 8
 
 	if cmd.Summary != "" {
 		fmt.Fprintf(w, "%s - %s\n\n", cmd.Name, cmd.Summary)
@@ -386,6 +246,12 @@ func (c *CLI) printHelp(cmd *Command) error {
 	fmt.Fprintln(w)
 
 	if len(cmd.Args) > 0 {
+		maxArgLen := 0
+		for _, a := range cmd.Args {
+			if len(a.Name) > maxArgLen {
+				maxArgLen = len(a.Name)
+			}
+		}
 		fmt.Fprintln(w, "Arguments:")
 		for _, a := range cmd.Args {
 			suffix := ""
@@ -395,7 +261,8 @@ func (c *CLI) printHelp(cmd *Command) error {
 			if a.Variadic {
 				suffix += " (variadic)"
 			}
-			fmt.Fprintf(w, "  %s\t%s%s\n", a.Name, a.Description, suffix)
+			spacing := strings.Repeat(" ", minSpacing)
+			fmt.Fprintf(w, "  %-*s%s%s%s\n", maxArgLen, a.Name, spacing, a.Description, suffix)
 		}
 		fmt.Fprintln(w)
 	}
@@ -408,18 +275,30 @@ func (c *CLI) printHelp(cmd *Command) error {
 		cmd.Flags(fs)
 	}
 
-	var flagLines []string
+	type flagInfo struct {
+		name, usage, def string
+	}
+	var flags []flagInfo
 	fs.VisitAll(func(f *flag.Flag) {
 		if f.Name == "h" || f.Name == "help" {
 			return
 		}
-		flagLines = append(flagLines, fmt.Sprintf("  -%s\t%s (default %q)", f.Name, f.Usage, f.DefValue))
+		flags = append(flags, flagInfo{f.Name, f.Usage, f.DefValue})
 	})
-	if len(flagLines) > 0 {
-		sort.Strings(flagLines)
+	if len(flags) > 0 {
+		maxFlagLen := 0
+		for _, fl := range flags {
+			if len(fl.name) > maxFlagLen {
+				maxFlagLen = len(fl.name)
+			}
+		}
+		sort.Slice(flags, func(i, j int) bool {
+			return flags[i].name < flags[j].name
+		})
 		fmt.Fprintln(w, "Flags:")
-		for _, line := range flagLines {
-			fmt.Fprintln(w, line)
+		for _, fl := range flags {
+			spacing := strings.Repeat(" ", minSpacing)
+			fmt.Fprintf(w, "  -%-*s%s%s (default %q)\n", maxFlagLen, fl.name, spacing, fl.usage, fl.def)
 		}
 		fmt.Fprintln(w)
 	}
@@ -432,7 +311,19 @@ func (c *CLI) printHelp(cmd *Command) error {
 		subs = append(subs, sub)
 	}
 	if len(subs) > 0 {
+		maxCmdLen := 0
+		for _, sub := range subs {
+			if len(sub.Name) > maxCmdLen {
+				maxCmdLen = len(sub.Name)
+			}
+		}
 		sort.Slice(subs, func(i, j int) bool {
+			if subs[i].Name == c.HelpCommandName {
+				return true
+			}
+			if subs[j].Name == c.HelpCommandName {
+				return false
+			}
 			return subs[i].Name < subs[j].Name
 		})
 		fmt.Fprintln(w, "Commands:")
@@ -444,96 +335,13 @@ func (c *CLI) printHelp(cmd *Command) error {
 			if desc == "" {
 				desc = "-"
 			}
-			fmt.Fprintf(w, "  %s\t%s\n", sub.Name, desc)
+			spacing := strings.Repeat(" ", minSpacing)
+			fmt.Fprintf(w, "  %-*s%s%s\n", maxCmdLen, sub.Name, spacing, desc)
 		}
 		fmt.Fprintln(w)
 	}
 
 	return nil
-}
-
-func applyMiddleware(h Handler, m []Middleware) Handler {
-	if h == nil {
-		return nil
-	}
-
-	for i := len(m) - 1; i >= 0; i-- {
-		if m[i] == nil {
-			continue
-		}
-		h = m[i](h)
-	}
-	return h
-}
-
-func validatePositionalArgs(cmd *Command, parsed []string) error {
-	if len(cmd.Args) == 0 {
-		return nil
-	}
-
-	required := 0
-	var hasVariadic bool
-
-	for _, a := range cmd.Args {
-		if a.Variadic {
-			hasVariadic = true
-		}
-		if !a.Optional && !a.Variadic {
-			required++
-		}
-	}
-
-	if len(parsed) < required {
-		return fmt.Errorf("missing required arguments (need %d)", required)
-	}
-
-	if !hasVariadic && len(parsed) > len(cmd.Args) {
-		return fmt.Errorf("too many arguments (got %d, max %d)", len(parsed), len(cmd.Args))
-	}
-
-	return nil
-}
-
-func findSubcommand(cmd *Command, token string) *Command {
-	if cmd == nil {
-		return nil
-	}
-
-	for _, sub := range cmd.Commands {
-		if sub == nil || sub.Hidden {
-			continue
-		}
-		if sub.Name == token {
-			return sub
-		}
-		for _, a := range sub.Aliases {
-			if a == token {
-				return sub
-			}
-		}
-	}
-
-	return nil
-}
-
-func collides(parent *Command, nameOrAlias string) bool {
-	if parent == nil {
-		return false
-	}
-	for _, sub := range parent.Commands {
-		if sub == nil {
-			continue
-		}
-		if sub.Name == nameOrAlias {
-			return true
-		}
-		for _, a := range sub.Aliases {
-			if a == nameOrAlias {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func snapshotFlags(fs *flag.FlagSet) map[string]any {
