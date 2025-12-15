@@ -1,7 +1,3 @@
-:root {
-  
-}
-
 body {
   display: flex;
   flex-flow: column;
@@ -9,7 +5,6 @@ body {
 }
 
 header {
-  padding-block: var(--space-xs);
   padding-inline: var(--space-m);
   background-color: var(--color-layer-2);
 }
@@ -19,22 +14,85 @@ main {
   display: flex;
   flex-flow: column;
   gap: var(--space-l);
+
+  @media (width >= 1280px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto max-content;
+    gap: var(--space-xl);
+
+    section:last-of-type {
+      grid-column: span 2;
+      grid-row: 2;
+    }
+  }
 }
 
-.tabs {
-  .tablist {
-    display: flex;
-    margin-bottom: var(--space-s);
-    list-style: none;
-    margin: 0;
-    height: fit-content;
+.editor {
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,'Liberation Mono', 'Courier New', monospace;
+  container: editor / size;
+  block-size: 420px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-m);
+  border: var(--stroke-width-s) var(--stroke-style) var(--color-stroke-strong);
+  padding: var(--space-m);
+  resize: vertical;
+  color: var(--color-text-subtle);
+  background-color: var(--color-layer-1);
+  position: relative;
+
+  &:focus-within {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
-  .tabpanel {
-    display: none;
+  pre {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    background-color: transparent;
+    pointer-events: none;
+    overflow: auto;
+    height: 100%;
 
-    &:target {
-      display: block;
+    code {
+      padding: 0;
+      font-family: inherit;
+      font-size: inherit;
+      background-color: transparent;
+    }
+  }
+
+  textarea {
+    width: 100cqi;
+    height: 100cqb;
+    inset: var(--space-m);
+    outline: none;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    background-color: transparent;
+    padding: 0;
+    position: absolute;
+    color: transparent;
+    caret-color: #e6edf3;
+    resize: none;
+  }
+}
+
+.wrapper {
+  border: var(--stroke-width-s) var(--stroke-style) var(--color-stroke-strong);
+  padding: var(--space-m);
+
+  &:focus-within {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  #cli {
+    & ::-webkit-scrollbar {
+      display: none;
     }
   }
 }

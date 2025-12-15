@@ -4,13 +4,14 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 	"syscall/js"
 
 	"github.com/kingoftac/flagon/cli"
-	lua "github.com/kingoftac/flagon/cli-lua"
+	"github.com/kingoftac/flagon/lua"
 )
 
 var (
@@ -50,7 +51,7 @@ func runCommand(cmd string) string {
 }
 
 // loadLuaPlugin loads a Lua script as a plugin
-func loadLuaPlugin(script string) string {
+func loadLuaPlugin(script string) interface{} {
 	output.Reset()
 
 	engine := lua.NewEngine(globalCLI)
@@ -58,15 +59,41 @@ func loadLuaPlugin(script string) string {
 	// Load script from string instead of file
 	err := engine.L.DoString(script)
 	if err != nil {
-		return fmt.Sprintf("Failed to load Lua script: %v", err)
+		return map[string]interface{}{"error": fmt.Sprintf("Failed to load Lua script: %v", err)}
 	}
 
-	result := output.String()
-	if result == "" {
-		result = "Lua plugin loaded successfully"
+	// Retrieve metadata from the last registered command
+	if engine.LastCommand == nil {
+		return `{"error": "No command found in Lua script"}`
 	}
 
-	return result
+	// Serialize the command struct to a map
+	cmd := engine.LastCommand
+	args := make([]map[string]interface{}, len(cmd.Args))
+	for i, arg := range cmd.Args {
+		args[i] = map[string]interface{}{
+			"name":        arg.Name,
+			"description": arg.Description,
+			"optional":    arg.Optional,
+			"variadic":    arg.Variadic,
+		}
+	}
+
+	data := map[string]interface{}{
+		"name":        cmd.Name,
+		"description": cmd.Description,
+		"summary":     cmd.Summary,
+		"hidden":      cmd.Hidden,
+		"aliases":     cmd.Aliases,
+		"args":        args,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Sprintf("Error serializing command: %v", err)
+	}
+
+	return string(jsonData)
 }
 
 // parseCommand splits a command string into arguments

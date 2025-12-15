@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/kingoftac/flagon/cli"
-	lua "github.com/kingoftac/flagon/cli-lua"
+	"github.com/kingoftac/flagon/lua"
 )
 
 func main() {

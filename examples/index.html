@@ -10,32 +10,44 @@
 
 <body>
   <header>
-    <h1>Flagon CLI</h1>
+    <a href="/">
+      <picture>
+        <source srcset="/flagon_dark.png" media="(prefers-color-scheme: dark)">
+        <source srcset="/flagon_light.png" media="(prefers-color-scheme: light)">
+        <img src="/flagon_light.png" alt="flagon logo" width="120">
+      </picture>
+    </a>
   </header>
   <main>
-    <div class="tabs" id="tabs">
-      <ul class="tablist">
-        <li><a class="button" href="#cli">CLI</a></li>
-        <li><a class="button" href="#lua">Lua Plugin</a></li>
-      </ul>
-      <div class="tabpanels">
+    <section>
+      <h3>Lua Plugin</h3>
+      <div class="editor">
+        <div id="preview"></div>
         <textarea
-          class="tabpanel editor"
-          id="cli"
-          rows="12"
-          cols="80"
-        ></textarea>
-        <textarea
-          class="tabpanel editor"
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off"
           id="lua"
-          rows="12"
-          cols="80"
-        ></textarea>
+        >command {
+  name = "hello",
+  description = "Say hello",
+  handler = function(ctx)
+    print("Hello from Lua!")
+  end
+}</textarea>
       </div>
-    </div>
-    <div>
+      <button id="load-lua">Load Lua Plugin</button>
+    </section>
+    <section>
+      <h3>CLI</h3>
+      <div class="wrapper">
+        <div id="cli"></div>
+      </div>
+    </section>
+    <section>
+      <h3>Console</h3>
       <textarea class="console" id="console" readonly rows="8" cols="80"></textarea>
-    </div>
+    </section>
   </main>
   <script type="module" src="/src/main.ts"></script>
 </body>

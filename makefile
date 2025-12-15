@@ -1,5 +1,7 @@
 # Makefile for flagon
 
+SHELL=powershell.exe
+
 .PHONY: build clean run test
 
 # Build the executable
@@ -8,7 +10,8 @@ build:
 
 # Clean build artifacts
 clean:
-	rm -f flagon.exe flagon.wasm
+	if exist flagon.exe del flagon.exe
+	if exist flagon.wasm del flagon.wasm
 
 # Run the application
 run: build
@@ -21,4 +24,4 @@ test:
 
 # Build WASM version
 build-wasm:
-	GOOS=js GOARCH=wasm go build -o flagon.wasm ./wasm
+	$$env:GOOS='js'; $$env:GOARCH='wasm'; go build -o ./examples/public/flagon.wasm ./wasm

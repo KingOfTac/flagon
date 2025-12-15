@@ -10,8 +10,9 @@ import (
 )
 
 type Engine struct {
-	L         *lua.LState
-	registrar cli.PluginRegistrar
+	L           *lua.LState
+	registrar   cli.PluginRegistrar
+	LastCommand *cli.Command
 }
 
 func NewEngine(registrar cli.PluginRegistrar) *Engine {

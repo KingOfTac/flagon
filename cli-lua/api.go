@@ -22,5 +22,7 @@ func (e *Engine) luaCommand(L *lua.LState) int {
 		return 0
 	}
 
+	e.LastCommand = cmd
+
 	return 0
 }

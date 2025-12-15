@@ -18,3 +18,11 @@ command {
     print("Hello from Lua!", ctx.args[1])
   end
 }
+
+command {
+  name = "hello",
+  description = "Say hello",
+  handler = function(ctx)
+    print("Hello from Lua!")
+  end
+}

@@ -23,7 +23,10 @@
     "dev": "vite dev"
   },
   "dependencies": {
+    "@carnesen/cli": "^0.9.0",
     "@neutron-ui/neutron": "^0.1.5",
+    "@xterm/xterm": "^5.5.0",
+    "highlight.js": "^11.11.1",
     "vite": "^7.2.7"
   },
   "devDependencies": {
