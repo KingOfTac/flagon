@@ -1,0 +1,46 @@
+:root {
+  
+}
+
+body {
+  display: flex;
+  flex-flow: column;
+  gap: var(--space-l);
+}
+
+header {
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-m);
+  background-color: var(--color-layer-2);
+}
+
+main {
+  padding-inline: var(--space-m);
+  display: flex;
+  flex-flow: column;
+  gap: var(--space-l);
+}
+
+.tabs {
+  .tablist {
+    display: flex;
+    margin-bottom: var(--space-s);
+    list-style: none;
+    margin: 0;
+    height: fit-content;
+  }
+
+  .tabpanel {
+    display: none;
+
+    &:target {
+      display: block;
+    }
+  }
+}
+
+.console {
+  resize: none;
+  color: var(--color-text-subtle);
+  cursor: default;
+}

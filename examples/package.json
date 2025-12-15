@@ -1,0 +1,32 @@
+{
+  "name": "@kingoftac/example-flagon",
+  "version": "0.0.0",
+  "description": "A simple example of using flagon",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Nathan Brown",
+    "url": "https://github.com/kingoftac/flagon"
+  },
+  "bugs": {
+    "url": "https://github.com/kingoftac/flagon/issues"
+  },
+  "homepage": "https://github.com/kingoftac/flagon#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kingoftac/flagon.git"
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "start": "vite --open",
+    "dev": "vite dev"
+  },
+  "dependencies": {
+    "@neutron-ui/neutron": "^0.1.5",
+    "vite": "^7.2.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

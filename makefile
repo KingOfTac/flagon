@@ -8,7 +8,7 @@ build:
 
 # Clean build artifacts
 clean:
-	rm -f flagon.exe
+	rm -f flagon.exe flagon.wasm
 
 # Run the application
 run: build
@@ -18,3 +18,7 @@ run: build
 test:
 	cd cli && go test
 	cd cli-lua && go test
+
+# Build WASM version
+build-wasm:
+	GOOS=js GOARCH=wasm go build -o flagon.wasm ./wasm

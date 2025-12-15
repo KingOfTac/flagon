@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flagon</title>
+    <script src="/wasm_exec.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>Flagon CLI</h1>
+  </header>
+  <main>
+    <div class="tabs" id="tabs">
+      <ul class="tablist">
+        <li><a class="button" href="#cli">CLI</a></li>
+        <li><a class="button" href="#lua">Lua Plugin</a></li>
+      </ul>
+      <div class="tabpanels">
+        <textarea
+          class="tabpanel editor"
+          id="cli"
+          rows="12"
+          cols="80"
+        ></textarea>
+        <textarea
+          class="tabpanel editor"
+          id="lua"
+          rows="12"
+          cols="80"
+        ></textarea>
+      </div>
+    </div>
+    <div>
+      <textarea class="console" id="console" readonly rows="8" cols="80"></textarea>
+    </div>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
