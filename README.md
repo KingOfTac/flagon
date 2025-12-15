@@ -24,7 +24,7 @@
 # Installation
 
 ```bash
-go get github.com/kingoftac/flagon
+go get github.com/kingoftac/flagon/cli
 ```
 
 # Getting Started
@@ -331,6 +331,11 @@ func (c *CLI) Run(args []string) error
 
 Flagon supports extending CLI functionality with Lua scripts for dynamic command definition.
 
+## Installation
+```bash
+go get github.com/kingoftac/flagon/lua
+```
+
 ## Loading Plugins
 
 ```go
@@ -341,7 +346,7 @@ import (
 	"os"
 
 	"github.com/kingoftac/flagon/cli"
-	"github.com/kingoftac/flagon/cli-lua"
+	"github.com/kingoftac/flagon/lua"
 )
 
 func main() {
