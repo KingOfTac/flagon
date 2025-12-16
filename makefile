@@ -2,16 +2,7 @@
 
 SHELL=powershell.exe
 
-.PHONY: build clean run test
-
-# Build the executable
-build:
-	go build -o flagon.exe ./cmd
-
-# Clean build artifacts
-clean:
-	if exist flagon.exe del flagon.exe
-	if exist flagon.wasm del flagon.wasm
+.PHONY: test
 
 # Run the application
 run: build
