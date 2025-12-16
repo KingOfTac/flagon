@@ -11,5 +11,5 @@ require github.com/yuin/gopher-lua v1.1.1 // indirect
 
 replace (
 	github.com/kingoftac/flagon/cli => ./cli
-	github.com/kingoftac/flagon/lua => ./cli-lua
+	github.com/kingoftac/flagon/lua => ./lua
 )
