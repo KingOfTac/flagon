@@ -24,6 +24,6 @@ jobs:
           ${{ runner.os }}-go-
 
     - run: go mod tidy
-    - run: go test ./...
+    - run: make test
     - run: GOPROXY=https://proxy.golang.org go list -m github.com/kingoftac/flagon/cli
     - run: GOPROXY=https://proxy.golang.org go list -m github.com/kingoftac/flagon/lua
