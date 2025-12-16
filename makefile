@@ -36,10 +36,10 @@ endif
 test:
 ifeq ($(GOOS),windows)
 	cd cli; go test;
-	cd cli-lua; go test;
+	cd lua; go test;
 else
 	cd cli && go test
-	cd cli-lua && go test
+	cd lua && go test
 endif
 
 wasm-env:
