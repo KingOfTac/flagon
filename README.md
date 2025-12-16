@@ -7,7 +7,7 @@
     </picture>
   </a>
 </p>
-<p align="center">A zero dependency, declarative CLI framework for GO</p>
+<p align="center">A declarative CLI framework for GO</p>
 
 ## Table of Contents
 
