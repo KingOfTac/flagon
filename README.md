@@ -21,6 +21,8 @@
 - [API Documentation](#api-documentation)
 - [Lua Plugin System](#lua-plugin-system)
 - [Contributing](#contributing)
+  - [Development](#development)
+  - [Testing](#testing)
 - [License](#license)
 
 ---
@@ -434,12 +436,57 @@ We welcome contributions! Please:
 git clone https://github.com/kingoftac/flagon.git
 cd flagon
 
-# Run tests
-go test ./...
+# Run unit tests (excludes fuzz tests)
+make test
 
-# Build
-make build
+# Build WASM demo
+make build-wasm
 ```
+
+## Testing
+
+Flagon includes comprehensive unit tests and fuzz tests for security-critical components.
+
+### Unit Tests
+
+```bash
+# Run all unit tests
+make test
+
+# Run tests for a specific package
+cd cli && go test -v
+cd lua && go test -v
+```
+
+### Fuzz Tests
+
+Fuzz tests help discover edge cases and potential security vulnerabilities in input parsing and the Lua sandbox.
+
+```bash
+# Run a specific fuzz test (default: FuzzCLIRun, 30s)
+make fuzz
+
+# Run a specific fuzz test with custom duration
+make fuzz FUZZ_TEST=FuzzLuaScriptExecution FUZZ_TIME=1m
+
+# Run all fuzz tests sequentially
+make fuzz-all FUZZ_TIME=30s
+```
+
+Available fuzz tests:
+
+| Package | Test | Description |
+|---------|------|-------------|
+| `cli` | `FuzzCLIRun` | Full CLI execution with arbitrary arguments |
+| `cli` | `FuzzValidatePositionalArgs` | Argument validation |
+| `cli` | `FuzzFindSubcommand` | Subcommand lookup |
+| `cli` | `FuzzCollides` | Name collision detection |
+| `cli` | `FuzzContextFunctions` | Context value operations |
+| `cli` | `FuzzMiddlewareChain` | Middleware pipeline |
+| `lua` | `FuzzLuaScriptExecution` | Lua sandbox escape attempts |
+| `lua` | `FuzzDecodeCommand` | Lua table to Command struct |
+| `lua` | `FuzzLuaHandler` | Handler callback execution |
+| `lua` | `FuzzLuaMiddleware` | Middleware callback execution |
 
 ## Reporting Issues
 

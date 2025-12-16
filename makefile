@@ -28,18 +28,58 @@ WASM_BUILD_CMD := $(ENV_WASM) go build -o '$(WASM_OUT)' ./wasm
 endif
 
 # -------------------------------------------------
+# Fuzz test configuration
+# -------------------------------------------------
+FUZZ_TIME ?= 30s
+FUZZ_TEST ?= FuzzCLIRun
+
+# -------------------------------------------------
 # Targets
 # -------------------------------------------------
 
-.PHONY: test wasm-env build-wasm
+.PHONY: test fuzz fuzz-all wasm-env build-wasm
 
 test:
 ifeq ($(GOOS),windows)
-	cd cli; go test;
-	cd lua; go test;
+	cd cli; go test -fuzz=^$$;
+	cd lua; go test -fuzz=^$$;
 else
-	cd cli && go test
-	cd lua && go test
+	cd cli && go test -fuzz='^$$'
+	cd lua && go test -fuzz='^$$'
+endif
+
+fuzz:
+ifeq ($(GOOS),windows)
+	cd cli; go test -fuzz=$(FUZZ_TEST) -fuzztime=$(FUZZ_TIME);
+	cd lua; go test -fuzz=$(FUZZ_TEST) -fuzztime=$(FUZZ_TIME);
+else
+	cd cli && go test -fuzz=$(FUZZ_TEST) -fuzztime=$(FUZZ_TIME)
+	cd lua && go test -fuzz=$(FUZZ_TEST) -fuzztime=$(FUZZ_TIME)
+endif
+
+fuzz-all:
+ifeq ($(GOOS),windows)
+	cd cli; go test -fuzz=FuzzCLIRun -fuzztime=$(FUZZ_TIME);
+	cd cli; go test -fuzz=FuzzValidatePositionalArgs -fuzztime=$(FUZZ_TIME);
+	cd cli; go test -fuzz=FuzzFindSubcommand -fuzztime=$(FUZZ_TIME);
+	cd cli; go test -fuzz=FuzzCollides -fuzztime=$(FUZZ_TIME);
+	cd cli; go test -fuzz=FuzzContextFunctions -fuzztime=$(FUZZ_TIME);
+	cd cli; go test -fuzz=FuzzMiddlewareChain -fuzztime=$(FUZZ_TIME);
+	cd lua; go test -fuzz=FuzzLuaScriptExecution -fuzztime=$(FUZZ_TIME);
+	cd lua; go test -fuzz=FuzzDecodeCommand -fuzztime=$(FUZZ_TIME);
+	cd lua; go test -fuzz=FuzzLuaHandler -fuzztime=$(FUZZ_TIME);
+	cd lua; go test -fuzz=FuzzLuaMiddleware -fuzztime=$(FUZZ_TIME);
+else
+	cd cli && go test -fuzz=FuzzCLIRun -fuzztime=$(FUZZ_TIME)
+	cd cli && go test -fuzz=FuzzValidatePositionalArgs -fuzztime=$(FUZZ_TIME)
+	cd cli && go test -fuzz=FuzzFindSubcommand -fuzztime=$(FUZZ_TIME)
+	cd cli && go test -fuzz=FuzzCollides -fuzztime=$(FUZZ_TIME)
+	cd cli && go test -fuzz=FuzzContextFunctions -fuzztime=$(FUZZ_TIME)
+	cd cli && go test -fuzz=FuzzMiddlewareChain -fuzztime=$(FUZZ_TIME)
+	cd lua && go test -fuzz=FuzzLuaScriptExecution -fuzztime=$(FUZZ_TIME)
+	cd lua && go test -fuzz=FuzzDecodeCommand -fuzztime=$(FUZZ_TIME)
+	cd lua && go test -fuzz=FuzzLuaHandler -fuzztime=$(FUZZ_TIME)
+	cd lua && go test -fuzz=FuzzLuaMiddleware -fuzztime=$(FUZZ_TIME)
 endif
 
 wasm-env:
