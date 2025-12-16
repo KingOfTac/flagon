@@ -8,6 +8,10 @@
   </a>
 </p>
 <p align="center">A zero dependency, declarative CLI framework for GO</p>
+<p align="center">
+	<a href="https://pkg.go.dev/github.com/kingoftac/flagon"><img src="https://pkg.go.dev/badge/github.com/kingoftac/flagon.svg" alt="Go Reference"></a>
+	<a href="https://github.com/KingOfTac/flagon/actions/workflows/ci.yml"><img src="https://github.com/KingOfTac/flagon/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
+</p>
 
 ## Table of Contents
 
